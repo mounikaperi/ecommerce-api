@@ -14,4 +14,8 @@ app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(fileUpload());
 
+const user = require('./src/routes/userRoute');
+
+app.use('/api/v1', user);
+
 module.exports = app;
