@@ -107,4 +107,18 @@ exports.addReviewNUpdateRatingsOfProduct = async (req, res, next, product) => {
   let average = 0;
   product.reviews.forEach((currentReview) => average += currentReview.rating);
   product.ratings = average / product.reviews.length;
+};
+
+exports.deleteReviewNUpdateRatings = (product) => {
+  const reviews = product.reviews.filter((review) => review._id.toString() != req.query.id.toString());
+  let average = 0;
+  reviews.forEach((currentReview) => average += currentReview.rating);
+  let ratings = 0;
+  const numOfReviews = reviews.length;
+  if (reviews.length != 0) ratings = average / numOfReviews;
+  return {
+    reviews,
+    ratings: Number(ratings),
+    numOfReviews
+  }
 }

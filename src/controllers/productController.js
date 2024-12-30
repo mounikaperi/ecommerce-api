@@ -3,7 +3,7 @@ const SearchFeaturesHandler = require("../handlers/SearchFeaturesHandler");
 const asyncErrorHandler = require("../middlewares/asyncErrorHandler");
 const ErrorHandler = require('../handlers/ErrorHandler');
 const Product = require("../models/productModel");
-const { uploadProductImages, uploadProductBrandLogo, createProductSpecifications, uploadUpdatedProductImages, uploadUpdatedProductBrandLogo, updateProductSpecifications, addReviewNUpdateRatingsOfProduct } = require('../helpers/productsHelper');
+const { uploadProductImages, uploadProductBrandLogo, createProductSpecifications, uploadUpdatedProductImages, uploadUpdatedProductBrandLogo, updateProductSpecifications, addReviewNUpdateRatingsOfProduct, deleteReviewNUpdateRatings } = require('../helpers/productsHelper');
 
 exports.getAllProducts = asyncErrorHandler(async (req, res, next) => {
   const resultPerPage = 12;
@@ -109,6 +109,33 @@ exports.createProductReview = asyncErrorHandler(async (req, res, next) => {
   }
   await addReviewNUpdateRatingsOfProduct(req, res, next, product);
   await product.save({ validateBeforeSave: false });
+  res.status(200).json({
+    success: true
+  });
+});
+
+exports.getProductReviews = asyncErrorHandler (async (req, res, next) => {
+  const product = await Product.findById(req.query.id);
+  if (!product) {
+    return next(new ErrorHandler("Product not found", 404));
+  }
+  res.status(200).json({
+    success: true,
+    reviews: product.reviews
+  });
+});
+
+exports.deleteReview = asyncErrorHandler (async (req, res, next) => {
+  const product = await Product.findById(req.query.productId);
+  if (!product) {
+    return next(new ErrorHandler("Product not found", 404));
+  }
+  const updatedReviewsNRatings = deleteReviewNUpdateRatings(product);
+  await Product.findByIdAndUpdate(req.query.productId, updatedReviewsNRatings, {
+    new: true,
+    runValidators: true,
+    useFindAndModify: false
+  });
   res.status(200).json({
     success: true
   });
