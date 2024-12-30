@@ -1,6 +1,8 @@
 const cloudinary = require('cloudinary');
+const crypto = require('crypto');
 const User = require('../models/userModel');
 const asyncErrorHandler = require('../middlewares/asyncErrorHandler');
+const sendToken = require('../utils/sendToken');
 const ErrorHandler = require('../utils/ErrorHandler');
 const sendEmail = require('../utils/sendEmail');
 const { getResetPasswordUrl } = require('../utils/urlConfig');
@@ -88,6 +90,22 @@ exports.forgotPassword = asyncErrorHandler(async (req, res, next) => {
   }
 });
 
+exports.resetPassword = asyncErrorHandler(async (req, res, next) => {
+  const resetPasswordToken = crypto.createHash("sha256").update(req.params.token).digest("hex");
+  const user = await User.findOne({
+    resetPasswordToken,
+    resetPasswordExpire: { $gt: Date.now() }
+  });
+  if (!user) {
+    return next(new ErrorHandler("Invalid reset password token", 404));
+  }
+  user.password = req.body.password;
+  user.resetPasswordExpire = undefined;
+  user.resetPasswordToken = undefined;
+  await user.save();
+  sendToken(user, 200, res);
+});
+
 exports.updatePassword = asyncErrorHandler(async (req, res, next) => {
   const user = await User.findById(req.user.id).select("+password");
   const isPasswordMatched = await user.comparePassword(req.body.oldPassword);
@@ -123,6 +141,54 @@ exports.updateProfile = asyncErrorHandler(async (req, res, next) => {
     runValidators: true,
     useFindAndModify: true
   });
+  res.status(200).json({
+    success: true
+  });
+});
+
+// Admin Dashboard
+exports.getAllUsers = asyncErrorHandler(async (req, res, next) => {
+  const users = await User.find();
+  res.status(200).json({
+    success: true,
+    users
+  });
+});
+
+exports.getSingleUser = asyncErrorHandler(async (req, res, next) => {
+  const user = await User.findById(req.params.id);
+  if (!user) {
+    return next(new ErrorHandler(`User doesn't exist with id: ${req.params.id}`, 404));
+  }
+  res.status(200).json({
+    success: true,
+    user
+  });
+});
+
+exports.updateUserRole = asyncErrorHandler(async (req, res, next) => {
+  const newUserData = {
+    name: req.body.name,
+    email: req.body.email,
+    gender: req.body.gender,
+    role: req.body.role
+  };
+  await User.findByIdAndUpdate(req.params.id, newUserData, {
+    new: true,
+    runValidators: true,
+    useFindAndModify: false
+  });
+  res.status(200).json({
+    success: true
+  });
+});
+
+exports.deleteUser = asyncErrorHandler(async (req, res, next) => {
+  const user = await User.findById(req.params.id);
+  if (!user) {
+    return next(new ErrorHandler(`User doesn't exist with id: ${req.params.id}`, 404));
+  }
+  await user.remove();
   res.status(200).json({
     success: true
   });
