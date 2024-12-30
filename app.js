@@ -16,8 +16,10 @@ app.use(fileUpload());
 
 const user = require('./src/routes/userRoute');
 const product = require('./src/routes/productRoute');
+const order = require('./src/routes/orderRoute');
 
 app.use('/api/v1', user);
 app.use('/api/v1', product);
+app.use('/api/v1', order);
 
 module.exports = app;
