@@ -2,6 +2,7 @@ const express = require('express');
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const fileUpload = require('express-fileupload');
+const errorMiddleware = require('./middlewares/error');
 
 const app = express();
 
@@ -17,9 +18,14 @@ app.use(fileUpload());
 const user = require('./src/routes/userRoute');
 const product = require('./src/routes/productRoute');
 const order = require('./src/routes/orderRoute');
+const payment = require('./routes/paymentRoute');
 
 app.use('/api/v1', user);
 app.use('/api/v1', product);
 app.use('/api/v1', order);
+app.use('/api/v1', payment);
+
+// error middleware
+app.use(errorMiddleware);
 
 module.exports = app;
