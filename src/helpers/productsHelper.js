@@ -91,3 +91,20 @@ exports.updateProductSpecifications = asyncErrorHandler(async (req, res, next) =
   req.body.specifications = specs;
 });
 
+exports.addReviewNUpdateRatingsOfProduct = async (req, res, next, product) => {
+  const isProductReviewed = product.reviews.find((review) => review.user.toString() === req.user._id.toString());
+  if (isProductReviewed) {
+    product.reviews.forEach((review) => {
+      if (review.user.toString() === req.user._id.toString()) {
+        review.rating = rating;
+        review.comment = comment;
+      }
+    });
+  } else {
+    product.reviews.push(review);
+    product.numOfReviews = product.reviews.length;
+  }
+  let average = 0;
+  product.reviews.forEach((currentReview) => average += currentReview.rating);
+  product.ratings = average / product.reviews.length;
+}

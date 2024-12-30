@@ -3,7 +3,7 @@ const SearchFeaturesHandler = require("../handlers/SearchFeaturesHandler");
 const asyncErrorHandler = require("../middlewares/asyncErrorHandler");
 const ErrorHandler = require('../handlers/ErrorHandler');
 const Product = require("../models/productModel");
-const { uploadProductImages, uploadProductBrandLogo, createProductSpecifications, uploadUpdatedProductImages, uploadUpdatedProductBrandLogo, updateProductSpecifications } = require('../helpers/productsHelper');
+const { uploadProductImages, uploadProductBrandLogo, createProductSpecifications, uploadUpdatedProductImages, uploadUpdatedProductBrandLogo, updateProductSpecifications, addReviewNUpdateRatingsOfProduct } = require('../helpers/productsHelper');
 
 exports.getAllProducts = asyncErrorHandler(async (req, res, next) => {
   const resultPerPage = 12;
@@ -78,5 +78,38 @@ exports.updateProduct = asyncErrorHandler(async (req, res, next) => {
   res.status(201).json({
       success: true,
       product
+  });
+});
+
+exports.deleteProduct = asyncErrorHandler(async (req, res, next) => {
+  const product = await Product.findById(req.params.id);
+  if (!product) {
+    return next(new ErrorHandler("Product Not Found", 404));
+  }
+  product.images.forEach(async (currentImage) => {
+    await cloudinary.v2.uploader.destroy(currentImage.public_id);
+  });
+  await product.remove();
+  res.status(201).json({
+    success: true
+  });
+});
+
+exports.createProductReview = asyncErrorHandler(async (req, res, next) => {
+  const { rating, comment, productId } = req.body;
+  const review = {
+    user: req.user._id,
+    name: req.user.name,
+    rating: Number(rating),
+    comment
+  };
+  const product = await Product.findById(productId);
+  if (!product) {
+    return next(new ErrorHandler("Product Not Found", 404));
+  }
+  await addReviewNUpdateRatingsOfProduct(req, res, next, product);
+  await product.save({ validateBeforeSave: false });
+  res.status(200).json({
+    success: true
   });
 });
