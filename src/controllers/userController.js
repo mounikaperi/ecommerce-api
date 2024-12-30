@@ -3,7 +3,7 @@ const crypto = require('crypto');
 const User = require('../models/userModel');
 const asyncErrorHandler = require('../middlewares/asyncErrorHandler');
 const sendToken = require('../utils/sendToken');
-const ErrorHandler = require('../utils/ErrorHandler');
+const ErrorHandler = require('../handlers/ErrorHandler');
 const sendEmail = require('../utils/sendEmail');
 const { getResetPasswordUrl } = require('../utils/urlConfig');
 
