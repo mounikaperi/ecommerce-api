@@ -2,6 +2,8 @@ const cloudinary = require('cloudinary');
 const User = require('../models/userModel');
 const asyncErrorHandler = require('../middlewares/asyncErrorHandler');
 const ErrorHandler = require('../utils/ErrorHandler');
+const sendEmail = require('../utils/sendEmail');
+const { getResetPasswordUrl } = require('../utils/urlConfig');
 
 exports.registerUser = asyncErrorHandler(async (req, res, next) => {
   const avatarUploadedToCloud = await cloudinary.v2.uploader.upload(req.body.avatar, {
@@ -50,4 +52,26 @@ exports.logoutUser = asyncErrorHandler(async (req, res, next) => {
   })
 });
 
+exports.getUserDetails = asyncErrorHandler(async (req, res, next) => {
+  const user = await User.findById(req.user.id);
+  res.status(200).json({
+    success: true,
+    user
+  });
+});
+
+exports.forgotPassword = asyncErrorHandler(async (req, res, next) => {
+  const user = await User.findOne({ email: req.body.email });
+  if (!user) {
+    return next(new ErrorHandler("User not found", 404));
+  }
+  const resetToken = await user.getResetPasswordToken();
+  await user.save({ validateBeforeSave: false });
+  const resetPasswordUrl = getResetPasswordUrl(req.get("host"), resetToken);
+  try {
+    await sendEmail
+  } catch (error) {
+
+  }
+});
 
