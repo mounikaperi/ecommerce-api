@@ -15,7 +15,9 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(fileUpload());
 
 const user = require('./src/routes/userRoute');
+const product = require('./src/routes/productRoute');
 
 app.use('/api/v1', user);
+app.use('/api/v1', product);
 
 module.exports = app;
