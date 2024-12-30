@@ -4,7 +4,7 @@ const Product = require('../models/productModel');
 const ErrorHandler = require('../handlers/ErrorHandler');
 const sendEmail = require('../utils/sendEmail');
 
-exports.newOrder = asyncErrorHandler(async (req, res, next) => {
+const newOrder = asyncErrorHandler(async (req, res, next) => {
   const {
     shippingInfo,
     orderItems,
@@ -40,7 +40,7 @@ exports.newOrder = asyncErrorHandler(async (req, res, next) => {
   });
 });
 
-exports.getSingleOrderDetails = asyncErrorHandler(async (req, res, next) => {
+const getSingleOrderDetails = asyncErrorHandler(async (req, res, next) => {
   const order = await Order.findById(req.params.id).populate("user", "name email");
   if (!order) {
     return next(new ErrorHandler("Order not found", 404));
@@ -51,7 +51,7 @@ exports.getSingleOrderDetails = asyncErrorHandler(async (req, res, next) => {
   });
 });
 
-exports.myOrders = asyncErrorHandler(async (req, res, next) => {
+const myOrders = asyncErrorHandler(async (req, res, next) => {
   const orders = await Order.find({ user: req.user._id });
   if (!orders) {
     return next(new ErrorHandler("No orders found", 404));
@@ -62,7 +62,7 @@ exports.myOrders = asyncErrorHandler(async (req, res, next) => {
   });
 });
 
-exports.getAllOrders = asyncErrorHandler(async (req, res, next) => {
+const getAllOrders = asyncErrorHandler(async (req, res, next) => {
   const orders = await Order.find();
   if (!orders) {
     return next(new ErrorHandler("Order not found", 404));
@@ -76,7 +76,7 @@ exports.getAllOrders = asyncErrorHandler(async (req, res, next) => {
   });
 });
 
-exports.updateOrder = asyncErrorHandler(async (req, res, next) => {
+const updateOrder = asyncErrorHandler(async (req, res, next) => {
   const order = await Order.findById(req.params.id);
   if (!order) {
     return next(new ErrorHandler("Order not found", 404));
@@ -102,7 +102,7 @@ const updateStock = async (productId, quantity) => {
   await product.save({ validateBeforeSave: false });
 };
 
-exports.deleteOrder = asyncErrorHandler(async(req, res, next) => {
+const deleteOrder = asyncErrorHandler(async(req, res, next) => {
   const order = await Order.findById(req.params.id);
   if (!order) {
     return next(new ErrorHandler("Order not found", 404));
@@ -112,3 +112,12 @@ exports.deleteOrder = asyncErrorHandler(async(req, res, next) => {
     success: true
   });
 });
+
+module.exports = {
+  newOrder,
+  getSingleOrderDetails,
+  myOrders,
+  getAllOrders,
+  updateOrder,
+  deleteOrder
+}

@@ -3,7 +3,7 @@ const User = require('../models/userModel');
 const asyncErrorHandler = require('./asyncErrorHandler');
 const ErrorHandler = require('../utils/ErrorHandler');
 
-exports.isAuthenticatedUser = asyncErrorHandler(async (req, res, next) => {
+const isAuthenticatedUser = asyncErrorHandler(async (req, res, next) => {
   const { token } = req.cookies;
   if (!token) {
     return next(new ErrorHandler("Please login to access", 401));
@@ -13,11 +13,16 @@ exports.isAuthenticatedUser = asyncErrorHandler(async (req, res, next) => {
   next();
 })
 
-exports.authorizeRoles = (...roles) => {
+const authorizeRoles = (...roles) => {
   return (req, res, next) => {
     if (!roles.includes(req.user.role)) {
       return next(new ErrorHandler(`Role: ${req.user.role} is not allowed`, 403));
     }
     next();
   }
+}
+
+module.exports = {
+  isAuthenticatedUser,
+  authorizeRoles
 }

@@ -5,7 +5,7 @@ const ErrorHandler = require('../handlers/ErrorHandler');
 const Product = require("../models/productModel");
 const { uploadProductImages, uploadProductBrandLogo, createProductSpecifications, uploadUpdatedProductImages, uploadUpdatedProductBrandLogo, updateProductSpecifications, addReviewNUpdateRatingsOfProduct, deleteReviewNUpdateRatings } = require('../helpers/productsHelper');
 
-exports.getAllProducts = asyncErrorHandler(async (req, res, next) => {
+const getAllProducts = asyncErrorHandler(async (req, res, next) => {
   const resultPerPage = 12;
   const productsCount = await Product.countDocuments();
   const searchFeatures = new SearchFeaturesHandler(Product.find(), req.query).search().filter();
@@ -22,7 +22,7 @@ exports.getAllProducts = asyncErrorHandler(async (req, res, next) => {
   });
 });
 
-exports.getProducts = asyncErrorHandler(async (req, res, next) => {
+const getProducts = asyncErrorHandler(async (req, res, next) => {
   const products = await Product.find();
   res.status(200).json({
     success: true,
@@ -30,7 +30,7 @@ exports.getProducts = asyncErrorHandler(async (req, res, next) => {
   });
 });
 
-exports.getProductDetails = asyncErrorHandler(async (req, res, next) => {
+const getProductDetails = asyncErrorHandler(async (req, res, next) => {
   const product = await Product.findById(req.params.id);
   if (!product) {
     return next(new ErrorHandler("Product not found", 404));
@@ -41,7 +41,7 @@ exports.getProductDetails = asyncErrorHandler(async (req, res, next) => {
   });
 });
 
-exports.getAdminProducts = asyncErrorHandler(async (req, res, next) => {
+const getAdminProducts = asyncErrorHandler(async (req, res, next) => {
   const products = await Product.find();
   res.status(200).json({
     success: true,
@@ -49,7 +49,7 @@ exports.getAdminProducts = asyncErrorHandler(async (req, res, next) => {
   });
 });
 
-exports.createProduct = asyncErrorHandler(async (req, res, next) => {
+const createProduct = asyncErrorHandler(async (req, res, next) => {
   await uploadProductImages(req, res, next);
   await uploadProductBrandLogo(req, res, next);
   req.body.user = req.user.id;
@@ -61,7 +61,7 @@ exports.createProduct = asyncErrorHandler(async (req, res, next) => {
   });
 });
 
-exports.updateProduct = asyncErrorHandler(async (req, res, next) => {
+const updateProduct = asyncErrorHandler(async (req, res, next) => {
   let product = await Product.findById(req.params.id);
   if (!product) {
     return next(new ErrorHandler("Product not found", 404));
@@ -81,7 +81,7 @@ exports.updateProduct = asyncErrorHandler(async (req, res, next) => {
   });
 });
 
-exports.deleteProduct = asyncErrorHandler(async (req, res, next) => {
+const deleteProduct = asyncErrorHandler(async (req, res, next) => {
   const product = await Product.findById(req.params.id);
   if (!product) {
     return next(new ErrorHandler("Product Not Found", 404));
@@ -95,7 +95,7 @@ exports.deleteProduct = asyncErrorHandler(async (req, res, next) => {
   });
 });
 
-exports.createProductReview = asyncErrorHandler(async (req, res, next) => {
+const createProductReview = asyncErrorHandler(async (req, res, next) => {
   const { rating, comment, productId } = req.body;
   const review = {
     user: req.user._id,
@@ -114,7 +114,7 @@ exports.createProductReview = asyncErrorHandler(async (req, res, next) => {
   });
 });
 
-exports.getProductReviews = asyncErrorHandler (async (req, res, next) => {
+const getProductReviews = asyncErrorHandler (async (req, res, next) => {
   const product = await Product.findById(req.query.id);
   if (!product) {
     return next(new ErrorHandler("Product not found", 404));
@@ -125,7 +125,7 @@ exports.getProductReviews = asyncErrorHandler (async (req, res, next) => {
   });
 });
 
-exports.deleteReview = asyncErrorHandler (async (req, res, next) => {
+const deleteReview = asyncErrorHandler (async (req, res, next) => {
   const product = await Product.findById(req.query.productId);
   if (!product) {
     return next(new ErrorHandler("Product not found", 404));
@@ -140,3 +140,16 @@ exports.deleteReview = asyncErrorHandler (async (req, res, next) => {
     success: true
   });
 });
+
+module.exports = {
+  getAllProducts,
+  getProducts,
+  getProductDetails,
+  getAdminProducts,
+  createProduct,
+  updateProduct,
+  deleteProduct,
+  createProductReview,
+  getProductReviews,
+  deleteReview
+}

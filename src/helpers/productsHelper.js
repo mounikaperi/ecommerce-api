@@ -1,7 +1,7 @@
 const cloudinary = require('cloudinary');
 const asyncErrorHandler = require("../middlewares/asyncErrorHandler");
 
-exports.uploadProductImages = asyncErrorHandler(async (req, res, next) => {
+const uploadProductImages = asyncErrorHandler(async (req, res, next) => {
   let images = [];
   if (typeof req.body.images === "string") {
     images.push(req.body.images);
@@ -20,7 +20,7 @@ exports.uploadProductImages = asyncErrorHandler(async (req, res, next) => {
   req.body.images = Promise.all(uploadedImages);
 });
 
-exports.uploadProductBrandLogo = asyncErrorHandler(async (req, res, next) => {
+const uploadProductBrandLogo = asyncErrorHandler(async (req, res, next) => {
   const uploadedBrandLogo = await cloudinary.v2.uploader.upload(req.body.logo, {
     folder: "brands"
   });
@@ -34,7 +34,7 @@ exports.uploadProductBrandLogo = asyncErrorHandler(async (req, res, next) => {
   };
 });
 
-exports.createProductSpecifications = asyncErrorHandler(async (req, res, next) => {
+const createProductSpecifications = asyncErrorHandler(async (req, res, next) => {
   let specs = [];
   req.body.specifications.forEach((specification) => {
     specs.push(JSON.parse(specification));
@@ -42,7 +42,7 @@ exports.createProductSpecifications = asyncErrorHandler(async (req, res, next) =
   req.body.specifications = specs;
 });
 
-exports.uploadUpdatedProductImages = asyncErrorHandler(async (req, res, next, product) => {
+const uploadUpdatedProductImages = asyncErrorHandler(async (req, res, next, product) => {
   if (req.body.images != undefined) {
     let images = [];
     if (typeof req.body.images === "string") {
@@ -66,7 +66,7 @@ exports.uploadUpdatedProductImages = asyncErrorHandler(async (req, res, next, pr
   }
 });
 
-exports.uploadUpdatedProductBrandLogo = asyncErrorHandler(async (req, res, next) => {
+const uploadUpdatedProductBrandLogo = asyncErrorHandler(async (req, res, next) => {
   if (req.body.logo.length > 0) {
     await cloudinary.v2.uploader.destroy(product.brand.logo.public_id);
     const updatedBrandLogo = await cloudinary.v2.uploader.upload(req.body.logo, {
@@ -83,7 +83,7 @@ exports.uploadUpdatedProductBrandLogo = asyncErrorHandler(async (req, res, next)
   }
 });
 
-exports.updateProductSpecifications = asyncErrorHandler(async (req, res, next) => {
+const updateProductSpecifications = asyncErrorHandler(async (req, res, next) => {
   let specs = [];
   req.body.specifications.forEach((s) => {
     specs.push(JSON.parse(s))
@@ -91,7 +91,7 @@ exports.updateProductSpecifications = asyncErrorHandler(async (req, res, next) =
   req.body.specifications = specs;
 });
 
-exports.addReviewNUpdateRatingsOfProduct = async (req, res, next, product) => {
+const addReviewNUpdateRatingsOfProduct = async (req, res, next, product) => {
   const isProductReviewed = product.reviews.find((review) => review.user.toString() === req.user._id.toString());
   if (isProductReviewed) {
     product.reviews.forEach((review) => {
@@ -109,7 +109,7 @@ exports.addReviewNUpdateRatingsOfProduct = async (req, res, next, product) => {
   product.ratings = average / product.reviews.length;
 };
 
-exports.deleteReviewNUpdateRatings = (product) => {
+const deleteReviewNUpdateRatings = (product) => {
   const reviews = product.reviews.filter((review) => review._id.toString() != req.query.id.toString());
   let average = 0;
   reviews.forEach((currentReview) => average += currentReview.rating);
@@ -121,4 +121,15 @@ exports.deleteReviewNUpdateRatings = (product) => {
     ratings: Number(ratings),
     numOfReviews
   }
+}
+
+module.exports = {
+  uploadProductImages,
+  uploadProductBrandLogo,
+  createProductSpecifications,
+  uploadUpdatedProductImages,
+  uploadUpdatedProductBrandLogo,
+  updateProductSpecifications,
+  addReviewNUpdateRatingsOfProduct,
+  deleteReviewNUpdateRatings
 }
